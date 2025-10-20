@@ -1,0 +1,233 @@
+---
+title: My Coding Blog
+---
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+
+        body {
+            background-color: #f1f1f1;
+        }
+        @media (prefers-color-scheme: dark) {
+
+            .shiki,
+            .shiki span {
+                color: var(--shiki-dark) !important;
+                background-color: var(--shiki-dark-bg) !important;
+                /* Optional, if you also want font styles */
+                font-style: var(--shiki-dark-font-style) !important;
+                font-weight: var(--shiki-dark-font-weight) !important;
+                text-decoration: var(--shiki-dark-text-decoration) !important;
+            }
+        }
+
+        html.dark .shiki,
+        html.dark .shiki span {
+            color: var(--shiki-dark) !important;
+            background-color: var(--shiki-dark-bg) !important;
+            /* Optional, if you also want font styles */
+            font-style: var(--shiki-dark-font-style) !important;
+            font-weight: var(--shiki-dark-font-weight) !important;
+            text-decoration: var(--shiki-dark-text-decoration) !important;
+        }
+
+        .theme-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .theme-select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-select:focus {
+            outline: 2px solid #0969da;
+            outline-offset: 2px;
+        }
+
+        /* Code container and copy button styles */
+        .code-container {
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 10;
+        }
+
+        .code-container:hover .copy-button {
+            opacity: 1;
+        }
+
+        .copy-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .copy-button.copied {
+            background: #28a745;
+        }
+
+        .shiki.has-focused .line:not(.focused) {
+            filter: blur(2px);
+            transition: all 250ms;
+            opacity: 0.7;
+        }
+
+        .shiki.has-focused:hover .line:not(.focused) {
+            filter: blur(0);
+            opacity: 1;
+        }
+
+        .shiki .line.focused {
+            background-color: rgba(101, 117, 133, 0.16);
+            border-left: 3px solid #0969da;
+            padding-left: 0.5rem;
+            margin-left: -0.5rem;
+        }
+
+        .shiki .line.diff {
+            display: inline-block;
+            width: 100%;
+        }
+
+        .shiki .line.diff.add {
+            background-color: rgba(46, 160, 67, 0.15);
+            border-left: 3px solid #238636;
+            padding-left: 0.5rem;
+            margin-left: -0.5rem;
+        }
+
+        .shiki .line.diff.remove {
+            background-color: rgba(248, 81, 73, 0.15);
+            border-left: 3px solid #da3633;
+            padding-left: 0.5rem;
+            margin-left: -0.5rem;
+            opacity: 0.5 !important;
+        }
+
+        .shiki .line.highlighted {
+            background-color: rgba(255, 235, 59, 0.1);
+            border-left: 3px solid #ffc107;
+            padding-left: 0.5rem;
+            margin-left: -0.5rem;
+        }
+
+        .shiki {
+            padding: 1rem;
+            border-radius: 6px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .shiki code {
+            background: none;
+            padding: 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="theme-switcher">
+        <select class="theme-select" id="themeSelect">
+            <option value="light">GitHub Light</option>
+            <option value="dark">GitHub Dark</option>
+        </select>
+    </div>
+
+    {{ content }}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const docEl = document.documentElement;
+            const themeSelect = document.getElementById('themeSelect');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('shiki-theme') || (prefersDark ? 'dark' : 'light');
+
+            function switchTheme(themeName) {
+                docEl.classList.toggle('dark', themeName === 'dark');
+                docEl.classList.toggle('light', themeName === 'light');
+            }
+
+            if (themeSelect) {
+                themeSelect.value = savedTheme;
+                switchTheme(savedTheme);
+
+                themeSelect.addEventListener('change', function (e) {
+                    const selected = e.target.value;
+                    switchTheme(selected);
+                    localStorage.setItem('shiki-theme', selected);
+                });
+            } else {
+                // still apply saved/preferred theme if no selector present
+                switchTheme(savedTheme);
+            }
+
+            const codeBlocks = document.querySelectorAll('pre.shiki');
+
+            codeBlocks.forEach(function (codeBlock) {
+                const container = document.createElement('div');
+                container.className = 'code-container';
+
+                codeBlock.parentNode.insertBefore(container, codeBlock);
+                container.appendChild(codeBlock);
+
+                const copyButton = document.createElement('button');
+                copyButton.className = 'copy-button';
+                copyButton.textContent = 'Copy';
+                copyButton.setAttribute('aria-label', 'Copy code to clipboard');
+
+                copyButton.addEventListener('click', function () {
+                    const codeText = codeBlock.querySelector('code').textContent;
+
+                    navigator.clipboard.writeText(codeText).then(function () {
+                        copyButton.textContent = 'Copied!';
+                        copyButton.classList.add('copied');
+
+                        setTimeout(function () {
+                            copyButton.textContent = 'Copy';
+                            copyButton.classList.remove('copied');
+                        }, 2000);
+                    }).catch(function (err) {
+                        console.error('Failed to copy: ', err);
+                        copyButton.textContent = 'Failed';
+                        setTimeout(function () {
+                            copyButton.textContent = 'Copy';
+                        }, 2000);
+                    });
+                });
+
+                container.appendChild(copyButton);
+            });
+        });
+    </script>
+</body>
+
+</html>
