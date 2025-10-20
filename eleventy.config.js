@@ -6,22 +6,22 @@ import markdownItAttrs from 'markdown-it-attrs';
 
 export default async function (eleventyConfig) {
 
-	const highlighter = await createHighlighter({
-		themes: ["github-light", "github-dark"],
-		langs: [
-			bundledLanguages.javascript,
-			bundledLanguages.json,
-			bundledLanguages.css,
-			bundledLanguages.html,
-			bundledLanguages["c#"],
-			bundledLanguages.razor,
-			bundledLanguages.docker,
-			bundledLanguages.dotenv,
-			bundledLanguages.liquid,
-			bundledLanguages.powershell,
-			bundledLanguages.typescript
-		]
-	});
+    const highlighter = await createHighlighter({
+        themes: ["github-light", "github-dark"],
+        langs: [
+            bundledLanguages["c#"],
+            bundledLanguages.css,
+            bundledLanguages.docker,
+            bundledLanguages.dotenv,
+            bundledLanguages.html,
+            bundledLanguages.javascript,
+            bundledLanguages.json,
+            bundledLanguages.liquid,
+            bundledLanguages.powershell,
+            bundledLanguages.razor,
+            bundledLanguages.typescript
+        ]
+    });
 
 	const shiki = fromHighlighter(highlighter, {
 		 themes: {
